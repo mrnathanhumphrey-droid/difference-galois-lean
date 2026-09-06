@@ -46,6 +46,65 @@ instance : FunLike (Hom F G) M N where
 /-- The defining commutation, in applied form. -/
 theorem map_Φ (f : Hom F G) (m : M) : f (F.Φ m) = G.Φ (f m) := f.comm m
 
+/-- The identity morphism of difference modules. -/
+def id {R : Type*} [CommRing R] {D : DifferenceRing R}
+    {M : Type*} [AddCommGroup M] [Module R M]
+    (F : DifferenceModule D M) : Hom F F where
+  toLinearMap := LinearMap.id
+  comm := fun _ => rfl
+
+/-- Composition of difference-module morphisms: the underlying linear maps compose,
+and commutation with `Φ` is preserved (`g(f(Φ m)) = g(Φ(f m)) = Φ(g(f m))`). -/
+def comp {R : Type*} [CommRing R] {D : DifferenceRing R}
+    {M : Type*} [AddCommGroup M] [Module R M]
+    {N : Type*} [AddCommGroup N] [Module R N]
+    {P : Type*} [AddCommGroup P] [Module R P]
+    {F : DifferenceModule D M} {G : DifferenceModule D N} {H : DifferenceModule D P}
+    (g : Hom G H) (f : Hom F G) : Hom F H where
+  toLinearMap := g.toLinearMap.comp f.toLinearMap
+  comm := fun m => by
+    simp only [LinearMap.comp_apply]
+    rw [f.comm m, g.comm (f.toLinearMap m)]
+
+/-- Two morphisms are equal if their underlying linear maps agree. -/
+@[ext] theorem ext {R : Type*} [CommRing R] {D : DifferenceRing R}
+    {M : Type*} [AddCommGroup M] [Module R M]
+    {N : Type*} [AddCommGroup N] [Module R N]
+    {F : DifferenceModule D M} {G : DifferenceModule D N}
+    {f g : Hom F G} (h : f.toLinearMap = g.toLinearMap) : f = g := by
+  cases f; cases g; congr
+
+/-- Left identity: `id ∘ f = f`. -/
+@[simp] theorem id_comp {R : Type*} [CommRing R] {D : DifferenceRing R}
+    {M : Type*} [AddCommGroup M] [Module R M]
+    {N : Type*} [AddCommGroup N] [Module R N]
+    {F : DifferenceModule D M} {G : DifferenceModule D N}
+    (f : Hom F G) : comp (id G) f = f := by
+  apply ext
+  rfl
+
+/-- Right identity: `f ∘ id = f`. -/
+@[simp] theorem comp_id {R : Type*} [CommRing R] {D : DifferenceRing R}
+    {M : Type*} [AddCommGroup M] [Module R M]
+    {N : Type*} [AddCommGroup N] [Module R N]
+    {F : DifferenceModule D M} {G : DifferenceModule D N}
+    (f : Hom F G) : comp f (id F) = f := by
+  apply ext
+  rfl
+
+/-- Associativity of composition. -/
+theorem comp_assoc {R : Type*} [CommRing R] {D : DifferenceRing R}
+    {M : Type*} [AddCommGroup M] [Module R M]
+    {N : Type*} [AddCommGroup N] [Module R N]
+    {P : Type*} [AddCommGroup P] [Module R P]
+    {Q : Type*} [AddCommGroup Q] [Module R Q]
+    {F : DifferenceModule D M} {G : DifferenceModule D N}
+    {H : DifferenceModule D P} {K : DifferenceModule D Q}
+    (h : Hom H K) (g : Hom G H) (f : Hom F G) :
+    comp (comp h g) f = comp h (comp g f) := by
+  apply ext
+  rfl
+
 end Hom
 
 variable {R : Type*} [CommRing R] {D : DifferenceRing R}

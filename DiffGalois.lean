@@ -8,3 +8,4 @@ import DiffGalois.PicardVessiot
 import DiffGalois.PicardVessiotRing
 import DiffGalois.Coboundary
 import DiffGalois.QDiff2
+import DiffGalois.Tannakian

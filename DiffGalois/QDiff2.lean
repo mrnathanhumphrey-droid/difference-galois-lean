@@ -4,9 +4,7 @@ set_option linter.style.longLine false
 
 open RatFunc
 
--- All declarations in this worked example live in the `QDiff2` namespace so that its
--- local `σ` (and the shared helper lemmas) coexist with the general criterion in
--- `DiffGalois.Coboundary`.
+-- namespaced so this example's local sigma coexists with DiffGalois.Coboundary
 namespace QDiff2
 
 /-! ============================================================

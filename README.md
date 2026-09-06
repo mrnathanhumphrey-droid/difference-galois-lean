@@ -2,9 +2,11 @@
 
 A [Lean 4](https://leanprover.github.io/) + [mathlib](https://github.com/leanprover-community/mathlib4)
 formalization of **difference (σ-) algebra** — difference rings and modules, their rigid tensor
-structure, difference ideals, and the construction of a **Picard–Vessiot ring** for a linear
-difference system `σ(Y) = A·Y` — together with one fully worked example: the level-1
-difference-Galois group of the substitution `σ : z ↦ z³` over `ℚ(z)`.
+structure, difference ideals, the construction of a **Picard–Vessiot ring** for a linear
+difference system `σ(Y) = A·Y`, the **difference-Galois group** of an extension, and
+**Chevalley's "no new constants" theorem** (van der Put–Singer Lemma 1.8) — together with one
+fully worked example: the level-1 difference-Galois group of the substitution `σ : z ↦ z³`
+over `ℚ(z)`.
 
 The whole development **compiles with no `sorry` and no added axioms** on
 `leanprover/lean4:v4.30.0` with the pinned mathlib revision (see `lean-toolchain` and
@@ -41,6 +43,19 @@ Everything below is stated and proved in Lean; the file each lives in is given.
   - **`exists_isPicardVessiot`** — for an invertible `A`, the system `σ(Y) = A·Y` admits a
     Picard–Vessiot ring (a `σ`-simple quotient of `R₀[1/det]` realizing a full solution matrix).
 
+**The difference-Galois group and "no new constants"**
+- `DiffGalois/Tannakian.lean` — the difference-Galois group and the Chevalley constants theory:
+  - **`galoisGroup`** — the difference-Galois group of an extension `S / R`: the `R`-algebra
+    automorphisms of `S` commuting with the shift, as a `Subgroup` of `S ≃ₐ[R] S`.
+  - **`isUnit_of_isSigmaSimple_of_constant`**, **`constantsField`**, **`constantsFieldOfSigmaSimple`**
+    — in a σ-simple difference ring every nonzero constant is a unit, and the constants form a
+    field (Chevalley's two atoms).
+  - **`constants_eq_image_of_isAlgClosed`** — **"no new constants"** (Chevalley; van der Put–Singer
+    Lemma 1.8): for a σ-simple, finitely generated difference extension of a difference field whose
+    base constants are algebraically closed, every constant of `S` descends to a base constant
+    (`E.constants = (D.constants).map (algebraMap R S)`). This is what makes the difference-Galois
+    group algebraic.
+
 **The worked example — `σ : z ↦ z³` on `ℚ(z)`**
 - `DiffGalois/Coboundary.lean` — the σ-engine on `RatFunc ℚ` (`σ (X^n) = X^(3n)`), and the
   **coboundary criterion**:
@@ -62,6 +77,8 @@ Everything below is stated and proved in Lean; the file each lives in is given.
 |---|---|---|
 | `exists_isPicardVessiot` | `PicardVessiotRing.lean` | every invertible `σ(Y)=A·Y` has a Picard–Vessiot ring |
 | `exists_maximal_differenceIdeal` | `PicardVessiot.lean` | a proper difference ideal sits in a maximal one |
+| `galoisGroup` | `Tannakian.lean` | the difference-Galois group of `S/R` as a subgroup of `S ≃ₐ[R] S` |
+| `constants_eq_image_of_isAlgClosed` | `Tannakian.lean` | "no new constants": `E.constants = (D.constants).map (algebraMap R S)` |
 | `W1` | `Coboundary.lean` | `Σ r_j z^(−2·3^j)` is a σ-coboundary ⇔ `Σ r_j = 0` |
 | `QDiff2.P1_coboundary` | `QDiff2.lean` | `z⁴` is a σ-coboundary (`𝔾ₘ` collapses) |
 | `QDiff2.P2_not_coboundary` | `QDiff2.lean` | `z^(−2)` is not a σ-coboundary (`𝔾ₐ` survives) |
@@ -80,8 +97,11 @@ example**. To keep the record honest:
 - **The example is level 1.** `P1`/`P2` pin the difference-Galois group of the level-1
   truncation. The full tower and any consequence for a limiting object are **not** part of
   this repository.
-- **The Picard–Vessiot side is the ring-existence layer.** `exists_isPicardVessiot` constructs
-  a PV ring; the full Galois-group/torsor correspondence is not formalized here.
+- **The Galois side is the group plus the constants theorem, not the full correspondence.**
+  `exists_isPicardVessiot` constructs a PV ring, `galoisGroup` defines the group, and
+  `constants_eq_image_of_isAlgClosed` proves "no new constants"; the full Galois correspondence
+  (the group's algebraic-group/torsor structure and the subgroup–subextension anti-equivalence)
+  is not formalized here.
 
 If any of the difference-algebra constructions overlap existing or in-progress mathlib work,
 please point it out — feedback is very welcome (see below).
