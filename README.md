@@ -71,6 +71,23 @@ Everything below is stated and proved in Lean; the file each lives in is given.
   Together these identify the level-1 difference-Galois group of the example as the additive
   group `𝔾ₐ` — a proper subgroup of the affine group `𝔾ₐ ⋊ 𝔾ₘ`.
 
+**In progress — toward the Tannakian side** (compiled, no `sorry`; the reconstruction itself is
+not done yet)
+- `DiffGalois/Abelian.lean` — kernel, image and coimage of a difference-module morphism as
+  difference modules (the shift preserves kernels and ranges), and the first isomorphism theorem
+  commuting with the shift (`quotKerEquivRange_comm`): the start of the abelian structure.
+- `DiffGalois/FiberFunctor.lean` — the fiber functor `ω(M) = {m : Φ m = m}` as a module over the
+  constants (`omega`), functorial in morphisms and compatible with `⊗` on invariants.
+- `DiffGalois/Differential.lean` — σδ-rings and σδ-modules (a derivation commuting with `σ`, a
+  connection on the module), the ground floor of the parameterized theory.
+- `DiffGalois/InversiveClosure.lean` — the inversive closure `R →σ R →σ ⋯` as a direct limit, on
+  which the shift becomes bijective when `σ` is injective (`sigmaInf_bijective`).
+- `DiffGalois/WeightedCoboundary.lean` — the weight-`c` version of the coboundary criterion
+  (`c·σψ − ψ = target`), forward half `W1c_of_wS_zero`.
+
+`IsSigmaSimple` now also requires the ring to be nontrivial, so the zero ring is no longer
+σ-simple by vacuity.
+
 ## Main results at a glance
 
 | Lean name | file | statement (informal) |

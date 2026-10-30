@@ -347,3 +347,106 @@ theorem W1 (r : ℕ → ℚ) (n : ℕ) :
   · exact W1_sum_zero_of_solvable r n
   · intro hsum
     exact ⟨wPsi r n, W1_of_sum_zero r n hsum⟩
+
+/-- Pole-order core for the weighted single monomial at level 0. Pure `ℚ[X]`
+root multiplicity; a nonzero constant weight `w₀` is invisible to `rootMultiplicity`,
+so this is `single_monomial_coboundary`'s zero-case arithmetic with `C w₀ *` threaded in. -/
+theorem weighted_pole_core (w₀ c : ℚ) (hw : w₀ ≠ 0) (a b : Polynomial ℚ)
+    (ha : a ≠ 0) (hb : b ≠ 0) (hcop : IsCoprime a b)
+    (hid : (Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b
+              - b.comp (Polynomial.X ^ 3) * a) * Polynomial.X ^ (2 * 3 ^ 0)
+            = Polynomial.C c * (b.comp (Polynomial.X ^ 3) * b)) :
+    c = 0 := by
+  by_contra hc
+  have hcne : Polynomial.C c ≠ 0 := by rw [ne_eq, Polynomial.C_eq_zero]; exact hc
+  have hwne : Polynomial.C w₀ ≠ 0 := by rw [ne_eq, Polynomial.C_eq_zero]; exact hw
+  have hexp : (Polynomial.aeval (Polynomial.X ^ 3 : Polynomial ℚ) : Polynomial ℚ →ₐ[ℚ] Polynomial ℚ)
+      = Polynomial.expand ℚ 3 :=
+    Polynomial.algHom_ext (by rw [Polynomial.aeval_X, Polynomial.expand_X])
+  have hinj : Function.Injective
+      (Polynomial.aeval (Polynomial.X ^ 3 : Polynomial ℚ) : Polynomial ℚ →ₐ[ℚ] Polynomial ℚ) := by
+    rw [hexp]; exact Polynomial.expand_injective (by norm_num)
+  have hcompa : (Polynomial.aeval (Polynomial.X ^ 3 : Polynomial ℚ)) a = a.comp (Polynomial.X ^ 3) := by
+    simp [Polynomial.aeval_def, Polynomial.comp]
+  have hcompb : (Polynomial.aeval (Polynomial.X ^ 3 : Polynomial ℚ)) b = b.comp (Polynomial.X ^ 3) := by
+    simp [Polynomial.aeval_def, Polynomial.comp]
+  have hAcne : a.comp (Polynomial.X ^ 3) ≠ 0 := fun hh => ha (hinj (by rw [hcompa, hh, map_zero]))
+  have hBcne : b.comp (Polynomial.X ^ 3) ≠ 0 := fun hh => hb (hinj (by rw [hcompb, hh, map_zero]))
+  set s := Polynomial.rootMultiplicity 0 a with hs
+  set t := Polynomial.rootMultiplicity 0 b with ht
+  have hCw : Polynomial.rootMultiplicity 0 (Polynomial.C w₀) = 0 := by
+    rw [Polynomial.rootMultiplicity_eq_zero]
+    rw [Polynomial.IsRoot.def, Polynomial.eval_C]
+    exact hw
+  have hCc : Polynomial.rootMultiplicity 0 (Polynomial.C c) = 0 := by
+    rw [Polynomial.rootMultiplicity_eq_zero]
+    rw [Polynomial.IsRoot.def, Polynomial.eval_C]
+    exact hc
+  have hRHS : Polynomial.rootMultiplicity 0 (Polynomial.C c * (b.comp (Polynomial.X ^ 3) * b)) = 4 * t := by
+    rw [Polynomial.rootMultiplicity_mul (mul_ne_zero hcne (mul_ne_zero hBcne hb)),
+        Polynomial.rootMultiplicity_mul (mul_ne_zero hBcne hb), rootMult_comp_X_pow b hb, hCc]
+    try omega
+  have hAb : Polynomial.rootMultiplicity 0 (Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b) = 3 * s + t := by
+    rw [Polynomial.rootMultiplicity_mul (mul_ne_zero (mul_ne_zero hwne hAcne) hb),
+        Polynomial.rootMultiplicity_mul (mul_ne_zero hwne hAcne),
+        rootMult_comp_X_pow a ha, hCw]
+    try omega
+  have hBa : Polynomial.rootMultiplicity 0 (b.comp (Polynomial.X ^ 3) * a) = 3 * t + s := by
+    rw [Polynomial.rootMultiplicity_mul (mul_ne_zero hBcne ha), rootMult_comp_X_pow b hb]
+    try omega
+  have hcrossne : Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b - b.comp (Polynomial.X ^ 3) * a ≠ 0 := by
+    intro hh; rw [hh, zero_mul] at hid
+    exact (mul_ne_zero hcne (mul_ne_zero hBcne hb)) hid.symm
+  have hLHS : Polynomial.rootMultiplicity 0
+      ((Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b - b.comp (Polynomial.X ^ 3) * a)
+        * Polynomial.X ^ (2 * 3 ^ 0))
+      = Polynomial.rootMultiplicity 0
+          (Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b - b.comp (Polynomial.X ^ 3) * a) + 2 * 3 ^ 0 := by
+    rw [Polynomial.rootMultiplicity_mul (mul_ne_zero hcrossne (pow_ne_zero _ Polynomial.X_ne_zero))]
+    congr 1
+    have : Polynomial.rootMultiplicity (0:ℚ) (Polynomial.X ^ (2 * 3 ^ 0)) = 2 * 3 ^ 0 := by
+      rw [← Polynomial.count_roots, Polynomial.roots_X_pow]; simp
+    exact this
+  have hmaster : Polynomial.rootMultiplicity 0
+      (Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b - b.comp (Polynomial.X ^ 3) * a) + 2 * 3 ^ 0 = 4 * t := by
+    rw [← hLHS, hid, hRHS]
+  have hmin : s = 0 ∨ t = 0 := by
+    by_contra hh
+    rw [not_or] at hh
+    obtain ⟨hs0, ht0⟩ := hh
+    have hXa : (Polynomial.X : Polynomial ℚ) ∣ a := by
+      have : a.IsRoot 0 := by rw [← Polynomial.rootMultiplicity_pos ha]; omega
+      simpa using (Polynomial.dvd_iff_isRoot (a := (0:ℚ))).mpr this
+    have hXb : (Polynomial.X : Polynomial ℚ) ∣ b := by
+      have : b.IsRoot 0 := by rw [← Polynomial.rootMultiplicity_pos hb]; omega
+      simpa using (Polynomial.dvd_iff_isRoot (a := (0:ℚ))).mpr this
+    exact Polynomial.not_isUnit_X (hcop.isUnit_of_dvd' hXa hXb)
+  have hAb : Polynomial.rootMultiplicity 0 (Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b) = 3 * s + t := by
+    rw [Polynomial.rootMultiplicity_mul (mul_ne_zero (mul_ne_zero hwne hAcne) hb),
+        Polynomial.rootMultiplicity_mul (mul_ne_zero hwne hAcne),
+        rootMult_comp_X_pow a ha, hCw]
+    omega
+  have hBa : Polynomial.rootMultiplicity 0 (b.comp (Polynomial.X ^ 3) * a) = 3 * t + s := by
+    rw [Polynomial.rootMultiplicity_mul (mul_ne_zero hBcne ha), rootMult_comp_X_pow b hb]
+  have hlow : min (3 * s + t) (3 * t + s)
+      ≤ Polynomial.rootMultiplicity 0
+          (Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b - b.comp (Polynomial.X ^ 3) * a) := by
+    have hneg : Polynomial.rootMultiplicity 0 (-(b.comp (Polynomial.X ^ 3) * a)) = 3 * t + s := by
+      rw [← Polynomial.count_roots, Polynomial.roots_neg, Polynomial.count_roots, hBa]
+    have := Polynomial.rootMultiplicity_add (0:ℚ)
+      (p := Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b) (q := -(b.comp (Polynomial.X ^ 3) * a))
+      (by rw [← sub_eq_add_neg]; exact hcrossne)
+    rw [← sub_eq_add_neg, hAb, hneg] at this
+    exact this
+  have hAb_eq : Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b
+      = (Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b - b.comp (Polynomial.X ^ 3) * a)
+        + b.comp (Polynomial.X ^ 3) * a := by ring
+  have hupp : min (Polynomial.rootMultiplicity 0
+        (Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b - b.comp (Polynomial.X ^ 3) * a)) (3 * t + s)
+      ≤ 3 * s + t := by
+    have := Polynomial.rootMultiplicity_add (0:ℚ)
+      (p := Polynomial.C w₀ * a.comp (Polynomial.X ^ 3) * b - b.comp (Polynomial.X ^ 3) * a)
+      (q := b.comp (Polynomial.X ^ 3) * a) (by rw [← hAb_eq]; exact mul_ne_zero (mul_ne_zero hwne hAcne) hb)
+    rw [← hAb_eq, hAb, hBa] at this
+    exact this
+  omega

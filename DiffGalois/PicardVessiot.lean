@@ -59,7 +59,7 @@ noncomputable def quotientDifferenceRing (I : Ideal R)
 (vdP–Singer: "a simple differential ring is one whose only differential ideals
 are (0) and R".) This is condition 1 of the Picard–Vessiot ring. -/
 def IsSigmaSimple : Prop :=
-  ∀ I : Ideal R, D.IsDifferenceIdeal I → I = ⊥ ∨ I = ⊤
+  Nontrivial R ∧ ∀ I : Ideal R, D.IsDifferenceIdeal I → I = ⊥ ∨ I = ⊤
 
 open Ideal in
 /-- **A maximal difference ideal exists** (vdP–Singer Prop 1.20: "let I be a

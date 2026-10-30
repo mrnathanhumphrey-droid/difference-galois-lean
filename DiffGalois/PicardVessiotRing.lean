@@ -246,25 +246,31 @@ to a difference ideal of `R` containing `I`; maximality forces it to be `I` (so
 `J = ⊥`) or `R` (so `J = ⊤`). -/
 theorem isSigmaSimple_quotient_of_maximal (I : Ideal R)
     (h : D.IsDifferenceIdeal I) (h' : ∀ x ∈ I, D.σ.symm x ∈ I)
-    (hmax : ∀ J, D.IsDifferenceIdeal J → I < J → J = ⊤) :
+    (hmax : ∀ J, D.IsDifferenceIdeal J → I < J → J = ⊤)
+    (hIne : I ≠ ⊤) :
     (D.quotientDifferenceRing I h h').IsSigmaSimple := by
-  intro J hJ
-  have hdiff : D.IsDifferenceIdeal (J.comap (Ideal.Quotient.mk I)) :=
-    isDifferenceIdeal_comap_mk D I h h' J hJ
-  have hIJ' : I ≤ J.comap (Ideal.Quotient.mk I) := by
-    intro x hx
-    simp only [Ideal.mem_comap]
-    rw [Ideal.Quotient.eq_zero_iff_mem.mpr hx]
-    exact J.zero_mem
-  have hmapeq : Ideal.map (Ideal.Quotient.mk I) (J.comap (Ideal.Quotient.mk I)) = J :=
-    Ideal.map_comap_of_surjective (Ideal.Quotient.mk I) Ideal.Quotient.mk_surjective J
-  rcases eq_or_lt_of_le hIJ' with heq | hlt
-  · left
-    rw [← hmapeq, ← heq]
-    simp [Ideal.map_quotient_self]
-  · right
-    rw [← hmapeq, hmax _ hdiff hlt]
-    exact Ideal.map_top _
+  refine ⟨?_, ?_⟩
+  · apply nontrivial_of_ne (1 : R ⧸ I) 0
+    intro hcontra
+    rw [← map_one (Ideal.Quotient.mk I), Ideal.Quotient.eq_zero_iff_mem] at hcontra
+    exact hIne ((Ideal.eq_top_iff_one I).2 hcontra)
+  · intro J hJ
+    have hdiff : D.IsDifferenceIdeal (J.comap (Ideal.Quotient.mk I)) :=
+      isDifferenceIdeal_comap_mk D I h h' J hJ
+    have hIJ' : I ≤ J.comap (Ideal.Quotient.mk I) := by
+      intro x hx
+      simp only [Ideal.mem_comap]
+      rw [Ideal.Quotient.eq_zero_iff_mem.mpr hx]
+      exact J.zero_mem
+    have hmapeq : Ideal.map (Ideal.Quotient.mk I) (J.comap (Ideal.Quotient.mk I)) = J :=
+      Ideal.map_comap_of_surjective (Ideal.Quotient.mk I) Ideal.Quotient.mk_surjective J
+    rcases eq_or_lt_of_le hIJ' with heq | hlt
+    · left
+      rw [← hmapeq, ← heq]
+      simp [Ideal.map_quotient_self]
+    · right
+      rw [← hmapeq, hmax _ hdiff hlt]
+      exact Ideal.map_top _
 
 #check @DifferenceRing.isSigmaSimple_quotient_of_maximal
 
@@ -350,7 +356,7 @@ theorem exists_isPicardVessiot (A : Matrix (Fin n) (Fin n) R) [Invertible A]
         (Ideal.Quotient.mk I (algebraMap R (PVloc (R := R) (n := n)) x))
       = Ideal.Quotient.mk I (algebraMap R (PVloc (R := R) (n := n)) (D.σ x))
     rw [(pvLocDifferenceRing D A).quotσ_mk I hIdiff hI', hloc]
-  · exact isSigmaSimple_quotient_of_maximal (pvLocDifferenceRing D A) I hIdiff hI' hImax
+  · exact isSigmaSimple_quotient_of_maximal (pvLocDifferenceRing D A) I hIdiff hI' hImax hIne
   · -- fundamental: F = generic matrix mapped into the quotient
     set φ : PVpoly (R := R) n →+* (PVloc ⧸ I) :=
       (Ideal.Quotient.mk I).comp (algebraMap (PVpoly (R := R) n) (PVloc (R := R) (n := n)))

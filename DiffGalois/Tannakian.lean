@@ -50,7 +50,7 @@ theorem isUnit_of_isSigmaSimple_of_constant {R : Type*} [CommRing R] (D : Differ
     rw [Ideal.mem_span_singleton'] at hx ⊢
     obtain ⟨a, rfl⟩ := hx
     exact ⟨D.σ a, by rw [map_mul, hc]⟩
-  rcases hsimple _ hdiff with hbot | htop
+  rcases hsimple.2 _ hdiff with hbot | htop
   · exact absurd (Ideal.span_singleton_eq_bot.mp hbot) hc0
   · exact Ideal.span_singleton_eq_top.mp htop
 
@@ -126,9 +126,13 @@ generated difference-`R`-algebra extension `E / D` with compatible shift and *al
 closed* base constants, every constant of `E` is the image of a base constant:
 `E^σ = image of D^σ`. This is what makes the difference-Galois group algebraic.
 
-Scaffolded: the ⊇ inclusion (base constants are `E`-constants, from `compat`) is proven; the
-⊆ inclusion splits into **(2) algebraicity of `E^σ` over `k`** (the analytic core — `sorry`)
-and **(3) alg-closed collapse** (clean). -/
+Proof: ⊇ — base constants are `E`-constants (from `compat`). ⊆ — a constant `c` is integral
+over `k = D^σ`: if it were transcendental, each `c − c₀` (`c₀ ∈ k`) would generate a difference
+ideal that σ-simplicity forces to be `⊥` or `⊤`; it is not `⊥`, so `c − c₀` is a unit. Yet `c`
+maps into `S/m ≅ k` for a maximal
+ideal `m` (Zariski / Jacobson, `k` algebraically closed), so some `c − c₀ ∈ m` — impossible.
+An integral constant then has a root of its minimal polynomial in the algebraically closed `k`,
+so it is a base constant. -/
 theorem constants_eq_image_of_isAlgClosed
     {R : Type*} [Field R] (D : DifferenceRing R)
     {S : Type*} [CommRing S] [IsDomain S] [Algebra R S] (E : DifferenceRing S)
@@ -163,7 +167,7 @@ theorem constants_eq_image_of_isAlgClosed
           refine ⟨E.σ a, ?_⟩
           have hcc : E.σ c = c := hc
           rw [map_mul, map_sub, hcc, hfix c₀]
-        rcases hsimple _ hdiff' with hbot | htop
+        rcases hsimple.2 _ hdiff' with hbot | htop
         · -- ⊥ impossible: c − algebraMap c₀ ≠ 0 since c ∉ k
           exfalso
           have hzero : c - algebraMap ↥(D.constants) S c₀ = 0 :=
